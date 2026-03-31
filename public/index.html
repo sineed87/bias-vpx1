@@ -40,96 +40,504 @@ select:focus,input[type=text]:focus{border-color:rgba(255,255,255,0.28);}
 .sp{display:inline-block;width:12px;height:12px;border:1.5px solid var(--border2);border-top-color:var(--text);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .err{color:var(--red);font-size:11px;margin-top:6px;font-family:var(--mono);display:none;}
+
+/* ── LIQUID SENTIMENT BAR ── */
 .sent-card{display:none;margin-top:1.25rem;border:0.5px solid var(--border);border-radius:var(--r);overflow:hidden;}
 .sent-top{display:flex;align-items:center;justify-content:space-between;padding:0.65rem 1.1rem;background:var(--bg2);border-bottom:0.5px solid var(--border);}
 .sent-lbl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);font-family:var(--mono);}
 .sent-pct{display:flex;gap:14px;font-size:13px;font-family:var(--mono);font-weight:500;}
 .pct-long{color:var(--green);}
 .pct-short{color:var(--red);}
+
+/* The tank */
 .tank{position:relative;height:64px;background:#0a0a0a;overflow:hidden;}
-.liq-g{position:absolute;left:0;top:0;bottom:0;width:50%;background:linear-gradient(135deg,#166534 0%,#16a34a 40%,#4ade80 100%);transition:width 1.4s cubic-bezier(0.34,1.56,0.64,1);}
-.liq-r{position:absolute;right:0;top:0;bottom:0;width:50%;background:linear-gradient(225deg,#7f1d1d 0%,#dc2626 40%,#f87171 100%);transition:width 1.4s cubic-bezier(0.34,1.56,0.64,1);}
-.wave-g,.wave-r{position:absolute;top:0;left:0;right:0;height:100%;}
-.liq-div{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,0.15);left:50%;transform:translateX(-50%);transition:left 1.4s cubic-bezier(0.34,1.56,0.64,1);}
-.tank-labels{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 14px;}
-.tank-lbl{font-size:11px;font-family:var(--mono);}
-.sent-source{padding:0.4rem 1.1rem;font-size:10px;color:var(--text3);font-family:var(--mono);background:var(--bg2);}
+
+/* Green liquid fills from left */
+.liq-g{
+  position:absolute;left:0;top:0;bottom:0;
+  width:50%;
+  background:linear-gradient(135deg,#166534 0%,#16a34a 40%,#4ade80 100%);
+  transition:width 1.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+/* Red liquid fills from right */
+.liq-r{
+  position:absolute;right:0;top:0;bottom:0;
+  width:50%;
+  background:linear-gradient(225deg,#7f1d1d 0%,#dc2626 40%,#f87171 100%);
+  transition:width 1.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+/* Wave on top of green */
+.wave-g{
+  position:absolute;top:0;left:0;right:0;height:100%;
+  background:repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    rgba(255,255,255,0.04) 20px,
+    transparent 40px
+  );
+  animation:waveMove 2.5s linear infinite;
+}
+/* Wave on top of red */
+.wave-r{
+  position:absolute;top:0;left:0;right:0;height:100%;
+  background:repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    rgba(0,0,0,0.06) 20px,
+    transparent 40px
+  );
+  animation:waveMove 2s linear infinite reverse;
+}
+@keyframes waveMove{from{background-position:0 0;}to{background-position:80px 0;}}
+
+/* Shine overlay */
+.tank::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:30%;
+  background:linear-gradient(180deg,rgba(255,255,255,0.05),transparent);
+  pointer-events:none;
+}
+
+/* Center divider line */
+.liq-div{
+  position:absolute;top:0;bottom:0;width:2px;
+  background:rgba(255,255,255,0.15);
+  left:50%;
+  transform:translateX(-50%);
+  transition:left 1.4s cubic-bezier(0.34,1.56,0.64,1);
+  z-index:3;
+}
+
+/* Labels inside tank */
+.tank-labels{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 14px;z-index:4;pointer-events:none;}
+.tank-lbl{font-size:11px;font-family:var(--mono);font-weight:500;opacity:0.9;text-shadow:0 1px 3px rgba(0,0,0,0.8);}
+.tank-lbl-l{color:#fff;}
+.tank-lbl-r{color:#fff;}
+
+/* Loading shimmer on tank */
+.tank-loading{position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.03) 50%,transparent 100%);background-size:200% 100%;animation:shimmer 1.5s infinite;display:none;}
+@keyframes shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
+
+.sent-source{padding:0.4rem 1.1rem;font-size:10px;color:var(--text3);font-family:var(--mono);background:var(--bg2);border-top:0.5px solid var(--border);}
+
+/* Fix box */
 .fix-box{display:none;margin-top:0.6rem;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:0.75rem 1.1rem;}
+.fix-lbl{font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:5px;}
+.fix-row{display:flex;gap:7px;}
+.fix-row input{flex:1;}
+.fix-send{padding:8px 13px;font-size:11px;font-family:var(--mono);background:transparent;border:0.5px solid var(--border2);border-radius:var(--r);color:var(--text2);cursor:pointer;white-space:nowrap;transition:all 0.12s;}
+.fix-send:hover{color:var(--text);border-color:rgba(255,255,255,0.28);}
+.fix-send:disabled{opacity:0.3;cursor:not-allowed;}
+
+/* Setups */
 .sc-wrap{display:none;margin-top:0.75rem;}
-.sc-grid{display:grid;grid-template-columns:1fr 1fr;}
+.sc-hdr{display:grid;grid-template-columns:1fr 1fr;border-radius:var(--r) var(--r) 0 0;overflow:hidden;}
+.sc-hdr-bull{padding:0.55rem 1.1rem;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono);background:var(--gbg);color:var(--green);border:0.5px solid var(--gborder);border-right:none;border-radius:var(--r) 0 0 0;}
+.sc-hdr-bear{padding:0.55rem 1.1rem;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono);background:var(--rbg);color:var(--red);border:0.5px solid var(--rborder);border-radius:0 var(--r) 0 0;}
+.sc-grid{display:grid;grid-template-columns:1fr 1fr;border:0.5px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);overflow:hidden;}
+.sc-col{background:var(--bg);}
+.sc-col:first-child{border-right:0.5px solid var(--border);}
 .sc-item{padding:0.85rem 1.1rem;border-bottom:0.5px solid var(--border);}
-.sc-num{font-size:10px;font-family:var(--mono);color:var(--text3);}
-.sc-body{font-size:12px;color:var(--text2);}
+.sc-col .sc-item:last-child{border-bottom:none;}
+.sc-num{font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:4px;letter-spacing:0.04em;}
+.sc-body{font-size:12px;line-height:1.65;color:var(--text2);}
+.sc-loading{padding:1rem 1.1rem;font-size:12px;color:var(--text3);font-family:var(--mono);}
 </style>
 </head>
-
 <body>
 <div class="wrap">
-<button onclick="test()">TEST</button>
+  <header>
+    <h1>VP Setup Analyzer</h1>
+    <span>volume profile · acceptance / rejection · day trade</span>
+  </header>
 
-<div class="sc-wrap" id="scWrap">
-  <div class="sc-grid">
-    <div id="colBull"></div>
-    <div id="colBear"></div>
+  <div class="sec">
+    <div class="lbl">Posnetek grafa</div>
+    <div id="drop" class="drop">
+      <input type="file" id="fileIn" accept="image/*"/>
+      <div class="drop-icon">↑</div>
+      <div class="drop-txt">Povleci graf sem ali klikni za nalaganje</div>
+      <div class="drop-sub">TradingView · ATAS · PNG · JPG</div>
+    </div>
+    <div id="prevWrap" class="prev" style="display:none;">
+      <img id="prevImg" src="" alt="graf"/>
+      <button class="prev-x" onclick="clearImg()">✕</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="row2">
+      <select id="inst">
+        <option value="EURUSD">EURUSD</option>
+        <option value="BTC">Bitcoin (BTC)</option>
+        <option value="NQ">NAS100 / NQ</option>
+        <option value="ES">S&amp;P500 / ES</option>
+        <option value="GBPUSD">GBPUSD</option>
+        <option value="XAUUSD">Zlato (XAUUSD)</option>
+        <option value="iz grafa">Razberem iz grafa</option>
+      </select>
+      <select id="tf">
+        <option value="15min">15min</option>
+        <option value="30min">30min</option>
+        <option value="1H" selected>1H</option>
+        <option value="4H">4H</option>
+        <option value="Daily">Daily</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn" id="analyzeBtn" onclick="analyze()">Analiziraj VP setupe ↗</button>
+  <div class="err" id="err"></div>
+
+  <!-- Sentiment liquid bar -->
+  <div class="sent-card" id="sentCard">
+    <div class="sent-top">
+      <span class="sent-lbl">Pozicioniranje trejderjev</span>
+      <div class="sent-pct">
+        <span class="pct-long" id="pctLong">Long –%</span>
+        <span class="pct-short" id="pctShort">Short –%</span>
+      </div>
+    </div>
+    <div class="tank" id="tank">
+      <div class="liq-g" id="liqG"></div>
+      <div class="wave-g"></div>
+      <div class="liq-r" id="liqR"></div>
+      <div class="wave-r"></div>
+      <div class="liq-div" id="liqDiv"></div>
+      <div class="tank-labels">
+        <span class="tank-lbl tank-lbl-l" id="tankL">Long</span>
+        <span class="tank-lbl tank-lbl-r" id="tankR">Short</span>
+      </div>
+      <div class="tank-loading" id="tankLoading"></div>
+    </div>
+    <div class="sent-source" id="sentSource">Iščem podatke...</div>
+  </div>
+
+  <!-- Fix box -->
+  <div class="fix-box" id="fixBox">
+    <div class="fix-lbl">Opazil napako? Popravi ↓</div>
+    <div class="fix-row">
+      <input type="text" id="fixInput" placeholder='npr. "POC je na 1.1520, ne 1.1540"'/>
+      <button class="fix-send" id="fixBtn" onclick="reanalyze()">Popravi ↗</button>
+    </div>
+  </div>
+
+  <!-- 3+3 Setups -->
+  <div class="sc-wrap" id="scWrap">
+    <div class="sc-hdr">
+      <div class="sc-hdr-bull">▲ Bikovni setapi (3)</div>
+      <div class="sc-hdr-bear">▼ Medvedji setapi (3)</div>
+    </div>
+    <div class="sc-grid">
+      <div class="sc-col" id="colBull">
+        <div class="sc-loading"><span class="sp"></span>Generiram setape...</div>
+      </div>
+      <div class="sc-col" id="colBear">
+        <div class="sc-loading"><span class="sp"></span>Generiram setape...</div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
+const VP_REF=`VP referenca: HVN=sprejemanje(cena gravitira) | LVN=zavrnitev(hiter preboj) | POC=fair value magnet | VAH/VAL=meje value area | nPOC=nepreizkušen POC=magnet | Acceptance=2+sveči v coni→nadaljevanje | Rejection=hiter odboj→reversal | Failed Auction=preboj brez sledstva→past`;
 
-/* 🔥 POPRAVLJENO */
+let b64=null, mime='image/png', lastAnalysis='';
+
+// Drop zone
+const drop=document.getElementById('drop'), fileIn=document.getElementById('fileIn');
+fileIn.addEventListener('change',e=>{if(e.target.files[0])load(e.target.files[0]);});
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('drag'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('drag');if(e.dataTransfer.files[0])load(e.dataTransfer.files[0]);});
+
+function load(f){
+  mime=f.type||'image/png';
+  const r=new FileReader();
+  r.onload=ev=>{
+    b64=ev.target.result.split(',')[1];
+    document.getElementById('prevImg').src=ev.target.result;
+    drop.style.display='none';
+    document.getElementById('prevWrap').style.display='block';
+    document.getElementById('err').style.display='none';
+  };
+  r.readAsDataURL(f);
+}
+function clearImg(){
+  b64=null;
+  document.getElementById('prevImg').src='';
+  document.getElementById('prevWrap').style.display='none';
+  drop.style.display='block';
+  fileIn.value='';
+}
+function showErr(m){const e=document.getElementById('err');e.textContent=m;e.style.display='block';}
+
+// API call
+async function callAPI(body){
+  const res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const data=await res.json();
+  if(!res.ok||data.error){
+    const m=typeof data.error==='string'?data.error:(data.error?.message||JSON.stringify(data.error||data));
+    throw new Error(m);
+  }
+  return (data.content||[]).map(b=>b.text||'').join('')||'';
+}
+
+// Liquid bar animation
+function animateLiquid(longPct, source){
+  const l=Math.max(3, Math.min(97, longPct));
+  const s=100-l;
+
+  // Show card first (starts at 50/50 from CSS init)
+  document.getElementById('sentCard').style.display='block';
+  document.getElementById('tankLoading').style.display='none';
+
+  // Animate after paint
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{
+      document.getElementById('liqG').style.width=l+'%';
+      document.getElementById('liqR').style.width=s+'%';
+      document.getElementById('liqDiv').style.left=l+'%';
+      document.getElementById('pctLong').textContent='Long '+l+'%';
+      document.getElementById('pctShort').textContent='Short '+s+'%';
+      document.getElementById('tankL').textContent='Long '+l+'%';
+      document.getElementById('tankR').textContent='Short '+s+'%';
+    }, 80);
+  });
+
+  document.getElementById('sentSource').textContent = source ? 'Vir: '+source : '';
+}
+
+// Show sentiment card immediately with loading state, then update
+function showSentimentLoading(){
+  // Init at 50/50
+  document.getElementById('liqG').style.width='50%';
+  document.getElementById('liqR').style.width='50%';
+  document.getElementById('liqDiv').style.left='50%';
+  document.getElementById('pctLong').textContent='Long –%';
+  document.getElementById('pctShort').textContent='Short –%';
+  document.getElementById('tankL').textContent='Long';
+  document.getElementById('tankR').textContent='Short';
+  document.getElementById('tankLoading').style.display='block';
+  document.getElementById('sentSource').textContent='Iščem podatke...';
+  document.getElementById('sentCard').style.display='block';
+}
+
+async function fetchSentiment(inst){
+  showSentimentLoading();
+  try{
+    const res=await fetch('/api/sentiment',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({instrument:inst})
+    });
+    const data=await res.json();
+    const text=data.sentiment||'';
+
+    // Parse LONG: and SHORT: values
+    const lm=text.match(/LONG:\s*(\d+)/i);
+    const srcM=text.match(/SOURCE:\s*(.+)/i);
+
+    if(lm){
+      animateLiquid(parseInt(lm[1]), srcM?srcM[1].trim():'');
+    } else {
+      // Fallback — try to parse any % pattern
+      const fallback=text.match(/(\d{2})%.*?(\d{2})%/);
+      if(fallback){
+        animateLiquid(parseInt(fallback[1]), 'ocena');
+      } else {
+        // No data — show neutral with note
+        animateLiquid(50, 'podatki niso na voljo');
+      }
+    }
+  }catch(e){
+    animateLiquid(50, 'napaka pri iskanju');
+  }
+}
+
+// Render 3+3 setups
 function renderSetups(text){
-
   function parseThree(block){
     if(!block) return [];
-    return block.split(/\n(?=Setup\s*\d)/i)
-      .map(s=>s.replace(/Setup\s*\d+/i,'').trim())
-      .filter(s=>s.length>5);
+    // Split on Setup N or numbered items
+    const items = block.split(/\n(?=Setup\s*\d|#\s*\d|\d\s*[.:\)])/i)
+      .map(s=>s.replace(/^(Setup\s*\d+[:\.]?|#\s*\d+[:\.]?|\d+\s*[.:\)])\s*/i,'').trim())
+      .filter(s=>s.length>5)
+      .slice(0,3);
+    return items;
   }
 
   const bullBlock=text.match(/BIKOVNI[\s\S]*?(?=MEDVEDJI|$)/i);
   const bearBlock=text.match(/MEDVEDJI[\s\S]*$/i);
-
   const bulls=parseThree(bullBlock?bullBlock[0]:'');
   const bears=parseThree(bearBlock?bearBlock[0]:'');
 
   function fillCol(items, colId){
-    const col=document.getElementById(colId);
-    col.innerHTML='';
+  const col=document.getElementById(colId);
+  col.innerHTML='';
 
-    if(items.length === 0){
-      col.innerHTML = `<div style="color:gray">Ni setupov</div>`;
-      return;
-    }
-
-    items.forEach((item, i)=>{
-      const div=document.createElement('div');
-      div.className='sc-item';
-      div.innerHTML=`
-        <div class="sc-num">Setup ${i+1}</div>
-        <div class="sc-body">${item.replace(/\n/g,'<br>')}</div>
-      `;
-      col.appendChild(div);
-    });
+  if(items.length === 0){
+    col.innerHTML = `<div class="sc-loading" style="color:var(--text3)">Ni setupov</div>`;
+    return;
   }
+
+  items.forEach((item, i)=>{
+    const div=document.createElement('div');
+    div.className='sc-item';
+    div.innerHTML=`
+      <div class="sc-num">Setup ${i+1}</div>
+      <div class="sc-body">${item.replace(/\n/g,'<br>')}</div>
+    `;
+    col.appendChild(div);
+  });
+}
 
   fillCol(bulls,'colBull');
   fillCol(bears,'colBear');
-
   document.getElementById('scWrap').style.display='block';
 }
 
-/* test */
-function test(){
-  renderSetups(`BIKOVNI
+async function fetchSetups(inst,tf,analysis){
+  // Show loading state
+  ['colBull','colBear'].forEach(id=>{
+    document.getElementById(id).innerHTML='<div class="sc-loading"><span class="sp"></span>Generiram setape...</div>';
+  });
+  document.getElementById('scWrap').style.display='block';
+
+  const p=`${VP_REF}
+
+VP analiza ${tf} za ${inst}:
+${analysis}
+
+Predlagaj TOČNO 3 bikovne in 3 medvedje VP day trade setupe.
+Vsak setup MAX 4 vrstice. Brez uvodov.
+
+BIKOVNI
 Setup 1
-Vstop: nekaj
-TP: nekaj
+Vstop: [VP cona + pogoj]
+Sprožilec: [acceptance/rejection/failed auction]
+SL: [nivo] · TP1: [nivo] · TP2: [nivo]
+R:R: [x:x]
+
+Setup 2
+[...]
+
+Setup 3
+[...]
 
 MEDVEDJI
 Setup 1
-Vstop: nekaj`);
+[...]
+
+Setup 2
+[...]
+
+Setup 3
+[...]`;
+
+  try{
+    const text=await callAPI({
+      model:'claude-sonnet-4-20250514',max_tokens:600,
+      system:'VP day trader. 3 bikovni + 3 medvedji setup. Slovenščina. Samo setapi, nič drugega.',
+      messages:[{role:'user',content:[{type:'text',text:p}]}]
+    });
+    renderSetups(text);
+  }catch(e){
+    ['colBull','colBear'].forEach(id=>{
+      document.getElementById(id).innerHTML=`<div class="sc-loading" style="color:var(--red)">Napaka: ${e.message}</div>`;
+    });
+  }
 }
 
+async function analyze(){
+  if(!b64){showErr('Najprej naloži posnetek grafa.');return;}
+  const inst=document.getElementById('inst').value;
+  const tf=document.getElementById('tf').value;
+  const btn=document.getElementById('analyzeBtn');
+
+  btn.disabled=true;
+  btn.innerHTML='<span class="sp"></span>Analiziram...';
+  document.getElementById('err').style.display='none';
+  document.getElementById('fixBox').style.display='none';
+  document.getElementById('sentCard').style.display='none';
+  document.getElementById('scWrap').style.display='none';
+
+  // Prompt for VP data extraction only
+  const p=`${VP_REF}
+
+Analiziraj ta ${tf} graf za ${inst} skozi VP perspektivo.
+Vrni SAMO VP podatke (brez pristranskosti, brez razlag):
+POC: [vrednost]
+VAH: [vrednost] · VAL: [vrednost]
+HVN: [vrednosti]
+LVN: [vrednosti]
+nPOC: [vrednost ali "ni viden"]
+Tip dneva: [rotacijski/discovery]`;
+
+  try{
+    const vpData=await callAPI({
+      model:'claude-sonnet-4-20250514',max_tokens:200,
+      system:'VP day trader. Samo VP podatki z grafa. Slovenščina. Brez pristranskosti in razlag.',
+      messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:mime,data:b64}},
+        {type:'text',text:p}
+      ]}]
+    });
+
+    lastAnalysis=vpData;
+    document.getElementById('fixBox').style.display='block';
+
+    // Start sentiment and setups in parallel — sentiment shown immediately
+    fetchSentiment(inst); // shows loading state right away
+    fetchSetups(inst, tf, vpData); // shows loading state right away
+
+  }catch(e){
+    showErr('Napaka: '+e.message);
+  }
+
+  btn.disabled=false;
+  btn.innerHTML='Analiziraj VP setupe ↗';
+}
+
+async function reanalyze(){
+  const fix=document.getElementById('fixInput').value.trim();
+  if(!fix||!b64)return;
+  const inst=document.getElementById('inst').value;
+  const tf=document.getElementById('tf').value;
+  const btn=document.getElementById('fixBtn');
+  btn.disabled=true;btn.textContent='Popravljam...';
+
+  const p=`${VP_REF}
+
+Prejšnja VP analiza:
+${lastAnalysis}
+
+Uporabnik popravil: "${fix}"
+
+Znova vrni samo VP podatke (brez pristranskosti):
+POC: [vrednost]
+VAH: [vrednost] · VAL: [vrednost]
+HVN: [vrednosti]
+LVN: [vrednosti]
+nPOC: [vrednost ali "ni viden"]
+Tip dneva: [rotacijski/discovery]`;
+
+  try{
+    const vpData=await callAPI({
+      model:'claude-sonnet-4-20250514',max_tokens:200,
+      system:'VP day trader. Samo VP podatki. Slovenščina.',
+      messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:mime,data:b64}},
+        {type:'text',text:p}
+      ]}]
+    });
+    lastAnalysis=vpData;
+    document.getElementById('fixInput').value='';
+    fetchSetups(inst, tf, vpData);
+  }catch(e){showErr('Napaka: '+e.message);}
+
+  btn.disabled=false;btn.textContent='Popravi ↗';
+}
 </script>
 </body>
 </html>
